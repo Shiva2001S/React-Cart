@@ -54,6 +54,7 @@ class CartItem extends React.Component {
         console.log(this.state);
     }
 
+
     render() {
         // In this step we are doing object de structuring
         // const { price, title, qty } = this.state;
@@ -78,8 +79,8 @@ class CartItem extends React.Component {
                         {/* <img alt="increase" className="action-icons" src={Increase} title="minus icons" onClick={this.increaseQuantity} /> */}
                         <img alt="decrease" className="action-icons" src={Decrease} title="minus icons" onClick={()=> this.props.onDecreaseQuantity(this.props.product)} />
                         {/* Here on clicking we are calling a fn which in turn calls another fn which is receiving from props */}
-                        <img alt="increase" className="action-icons" src={Increase} title="minus icons" onClick={()=> this.props.onIncreaseQuantity(this.props.product)} />
-                        <img alt="delete" className="action-icons" src={Delete} title="minus icons" />
+                        <img alt="increase" className="action-icons" src={Increase} title="add icons" onClick={()=> this.props.onIncreaseQuantity(this.props.product)} />
+                        <img alt="delete" className="action-icons" src={Delete} title="delete icons" onClick={()=> this.props.onDeleteProduct(this.props.product.id)} />
                     </div>
                 </div>
             </div>
