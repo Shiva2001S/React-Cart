@@ -6,7 +6,6 @@ import Navbar from './Navbar';
 // import 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-import {firebaseConfig} from './index';
 
 
 class App extends React.Component {
@@ -42,21 +41,63 @@ class App extends React.Component {
       products : [], 
       loading: true
     }
+    // It helps in making customizable variables
+    this.db = firebase.firestore();
   }
 
-  // this fn will be called just before our component is rendered
+  // this fn will be called when our component is updated
   componentDidMount(){
-    // We have to call it in every component 
-    firebase.initializeApp(firebaseConfig);
 
+    // There are 2 ways of reading data from firebase 
+
+    // first one is this in which we simply read the data and refresh when a change occurs
+
+    // firebase
+    //   .firestore()
+    //   // our collection name is products
+    //   .collection('products')
+    //   // We have used get method 
+    //   .get()
+    //   // get method return a promise
+    //   .then((snapshot)=>{
+    //     console.log(snapshot);
+
+    //     snapshot.docs.map((doc)=>{
+    //       // This fn doc.data gives the data in a document
+    //       console.log(doc.data());
+    //     });
+
+
+    //     const products = snapshot.docs.map((doc)=>{
+    //       const data = doc.data();
+
+    //       data['id'] = doc.id;
+
+    //       return data;
+    //     })
+
+    //     this.setState({
+    //       products, 
+    //       // After loading the data from firestore we are making the loading false
+    //       loading : false
+    //     })
+    //   })
+
+    // 2nd way is this in which we are attaching an event listener which changes the website when any change occurs
     firebase
       .firestore()
       // our collection name is products
       .collection('products')
-      // We have used get method 
-      .get()
-      // get method return a promise
-      .then((snapshot)=>{
+      // This fn helps in selecting the product whose price == 999
+      // .where('price', '==', 999)
+      // .where('title', '==', 'Mobile Phone')
+
+      // This fn helps in sorting the products in ascending order according to their price
+      .orderBy('price', 'asc')
+      
+      // This fn acts as observer and keep and eye on the update in firestore , if any update happens it will do it in front end side without refreshing the website
+      // It is a event listener
+      .onSnapshot((snapshot)=>{
         console.log(snapshot);
 
         snapshot.docs.map((doc)=>{
@@ -74,6 +115,7 @@ class App extends React.Component {
         })
 
         this.setState({
+          // In this step we are updating the products object that we have defined above
           products, 
           // After loading the data from firestore we are making the loading false
           loading : false
@@ -89,14 +131,28 @@ class App extends React.Component {
     // It gives us the indx of product array which is needed to be changed
     const index = products.indexOf(product);
 
-    products[index].qty += 1;
+    // products[index].qty += 1;
 
-    // Now we are rendering the updated products object
-    this.setState({
-      products: products
-      // Since key and values are same so we can also write it like this
-      // products
-    })
+    // // Now we are rendering the updated products object
+    // this.setState({
+    //   products: products
+    //   // Since key and values are same so we can also write it like this
+    //   // products
+    // })
+
+    // Here we are getting the ref. of the doc which is to be updated
+    const docRef = this.db.collection('products').doc(products[index].id);
+
+    docRef
+      .update({
+        qty : products[index].qty + 1
+      })
+      .then(()=>{
+        console.log('Updated successfully')
+      })
+      .catch((err)=>{
+        console.log('Error : ', err);
+      })
   }
 
   handleDecreaseQuantity = (product) => {
@@ -105,21 +161,45 @@ class App extends React.Component {
 
     if (products[index].qty == 0) { return; }
 
-    products[index].qty -= 1;
+    // products[index].qty -= 1;
 
-    this.setState({
-      products: products
-    })
+    // this.setState({
+    //   products: products
+    // })
+
+    const docRef = this.db.collection('products').doc(products[index].id);
+
+    docRef
+      .update({
+        qty : products[index].qty - 1
+      })
+      .then(()=>{
+        console.log('Updated successfully')
+      })
+      .catch((err)=>{
+        console.log('Error : ', err);
+      })
   }
 
   handleDeleteProduct = (id) => {
-    const { products } = this.state;
+    // const { products } = this.state;
 
-    const items = products.filter((item) => item.id !== id);
+    // const items = products.filter((item) => item.id !== id);
 
-    this.setState({
-      products: items
-    })
+    // this.setState({
+    //   products: items
+    // })
+
+    const docRef = this.db.collection('products').doc(id);
+
+    docRef
+      .delete()
+      .then(()=>{
+        console.log('Deleted successfully')
+      })
+      .catch((err)=>{
+        console.log('Error : ', err);
+      })
   }
 
   getCartCount = () => {
@@ -141,16 +221,36 @@ class App extends React.Component {
     let cartTotal = 0;
 
     products.map(product => {
-      cartTotal += product.qty;
+      cartTotal += product.price;
     }) 
 
     return cartTotal;
+  }
+
+  addProduct = () => {
+    // this is our made variable
+    this.db
+      .collection('products')
+      // this fn helps in adding the document in our firebase
+      .add({
+        img : '',
+        price : 9000,
+        qty : 3,
+        title : 'washing machine'
+      })
+      // this fn return us a promise in which it returns us the document which is added
+      .then((docRef)=>{
+        console.log('Product has been added', docRef);
+      }).catch((err)=>{
+        console.log('Error : ', err);
+      })
   }
   render() {
     const {products,loading} = this.state;
     return (
       <div className="App">
         <Navbar count={this.getCartCount()} />
+        {/* <button onClick={this.addProduct} style={{padding : 20, fontSize : 20}}>Add a product</button> */}
         <Cart
           products = {products}
           onIncreaseQuantity={this.handleIncreaseQuantity}

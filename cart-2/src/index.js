@@ -5,10 +5,12 @@ import App from './App';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 // import { firestore } from "firebase/app";
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
+// import * as firebase from 'firebase/app';
+// import 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyBjgGOVzQAySU-YxESQvq7fOr1tlndQmMU",
   authDomain: "cart-c4312.firebaseapp.com",
   projectId: "cart-c4312",
@@ -18,8 +20,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// firebase.initializeApp(firebaseConfig);
+// const app = initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -28,4 +30,5 @@ root.render(
   </React.StrictMode>
 );
 
-export {firebaseConfig};
+
+// export {firebaseConfig};
